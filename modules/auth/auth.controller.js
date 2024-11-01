@@ -1,6 +1,6 @@
 const User = require("../../models/user.model"); // Model người dùng
-const Client = require("../../models/client.model"); // Model client (nếu có)
-const AuthorizationCode = require("../../models/authorizationCode.model"); // Model mã ủy quyền
+const Client = require("../../models/oauthClient.model"); // Model client (nếu có)
+const AuthorizationCode = require("../../models/oAuthToken.model"); // Model mã ủy quyền
 const jwt = require("jsonwebtoken"); // Thư viện JWT
 
 // Đăng ký
@@ -15,12 +15,10 @@ const register = async (req, res) => {
 
     // Tạo người dùng mới
     const newUser = await User.create({ username, password }); // Mật khẩu cần được mã hóa trước khi lưu
-    res
-      .status(201)
-      .send({
-        message: "User registered successfully",
-        user: { _id: newUser.id, username: newUser.username },
-      });
+    res.status(201).send({
+      message: "User registered successfully",
+      user: { _id: newUser.id, username: newUser.username },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error registering user" });
