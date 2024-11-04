@@ -1,11 +1,14 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const passport = require("passport");
-const authRoutes = require("./modules/auth/auth.route"); // Route xác thực
-require("dotenv").config(); // Đảm bảo bạn có thể sử dụng biến môi trường
-const session = require("express-session");
-require("./config/passport");
-const morgan = require("morgan");
+import express from "express";
+import mongoose from "mongoose";
+import passport from "passport";
+import authRoutes from "./modules/auth/auth.route.js"; // Route xác thực
+import dotenv from "dotenv"; // Đảm bảo bạn có thể sử dụng biến môi trường
+import session from "express-session";
+import morgan from "morgan";
+import "./config/passport.js";
+
+// Cấu hình dotenv để sử dụng biến môi trường
+dotenv.config();
 
 const app = express();
 app.use(express.json());

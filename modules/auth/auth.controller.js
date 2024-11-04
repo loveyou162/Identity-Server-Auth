@@ -1,7 +1,14 @@
-const UserModel = require("../../models/user.model"); // Model người dùng
-const ClientModel = require("../../models/oauthClient.model"); // Model client (nếu có)
-const AuthorizationCode = require("../../models/oAuthToken.model"); // Model mã ủy quyền
-const jwt = require("jsonwebtoken"); // Thư viện JWT
+// Model người dùng
+import UserModel from "../../models/user.model.js";
+
+// Model client (nếu có)
+import ClientModel from "../../models/oauthClient.model.js";
+
+// Model mã ủy quyền
+import AuthorizationCode from "../../models/oAuthToken.model.js";
+
+// Thư viện JWT
+import jwt from "jsonwebtoken";
 
 // Đăng ký
 const postRegister = async (req, res) => {
@@ -126,7 +133,7 @@ const generateRandomCode = () => {
   return Math.random().toString(36).substr(2, 8); // Tạo mã ngẫu nhiên
 };
 
-module.exports = {
+export {
   postLogin,
   authorize,
   exchangeAuthorizationCodeForToken,

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const oauthEndpointSchema = new mongoose.Schema({
   clientId: {
     type: String,
@@ -29,4 +29,4 @@ const oauthEndpointSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("OAuthEndpoint", oauthEndpointSchema);
+export default mongoose.model("OAuthEndpoint", oauthEndpointSchema);
