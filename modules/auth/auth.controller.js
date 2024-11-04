@@ -1,20 +1,25 @@
-const User = require("../../models/user.model"); // Model người dùng
-const Client = require("../../models/oauthClient.model"); // Model client (nếu có)
+const UserModel = require("../../models/user.model"); // Model người dùng
+const ClientModel = require("../../models/oauthClient.model"); // Model client (nếu có)
 const AuthorizationCode = require("../../models/oAuthToken.model"); // Model mã ủy quyền
 const jwt = require("jsonwebtoken"); // Thư viện JWT
 
 // Đăng ký
-const register = async (req, res) => {
-  const { username, password } = req.body;
+const postRegister = async (req, res) => {
+  const { username, password, email, fullName, provider } = req.body;
+  console.log({ username, password, email, fullName, provider });
+
   try {
     // Kiểm tra xem người dùng đã tồn tại chưa
-    const existingUser = await User.findOne({ where: { username } });
+    const existingUser = await User.findOne({ where: { email } });
+    console.log(14, existingUser);
     if (existingUser) {
       return res.status(400).send({ message: "User already exists" });
     }
 
+    const hashedPassword = await bcrypt;
+
     // Tạo người dùng mới
-    const newUser = await User.create({ username, password }); // Mật khẩu cần được mã hóa trước khi lưu
+    const newUser = await new UserModel({ username, password }); // Mật khẩu cần được mã hóa trước khi lưu
     res.status(201).send({
       message: "User registered successfully",
       user: { _id: newUser.id, username: newUser.username },
@@ -26,7 +31,7 @@ const register = async (req, res) => {
 };
 
 // Đăng nhập người dùng
-const login = async (req, res) => {
+const postLogin = async (req, res) => {
   const user = req.user;
   console.log(req.user);
 
@@ -122,8 +127,8 @@ const generateRandomCode = () => {
 };
 
 module.exports = {
-  login,
+  postLogin,
   authorize,
   exchangeAuthorizationCodeForToken,
-  register,
+  postRegister,
 };

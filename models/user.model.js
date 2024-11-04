@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema({
     enum: ["active", "inactive", "deleted"],
     default: "active",
   },
+  provider: {
+    type: String,
+    enum: ["local", "google"],
+    default: "local",
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const oauthTokenSchema = new mongoose.Schema({
   accessToken: {
     type: String,
