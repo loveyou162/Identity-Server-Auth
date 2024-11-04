@@ -1,4 +1,11 @@
+const mongoose = require("mongoose");
+
 const oauthClientSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   clientId: {
     type: String,
     unique: true,

@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const oauthScopeSchema = new mongoose.Schema({
   scope: {
     type: String,
