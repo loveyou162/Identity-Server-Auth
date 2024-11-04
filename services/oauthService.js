@@ -1,8 +1,8 @@
-const oauth2orize = require("oauth2orize");
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user.model");
-const Client = require("../models/oauthClient.model");
+import oauth2orize from "oauth2orize";
+import passport from "passport";
+import jwt from "jsonwebtoken";
+import UserModel from "../models/user.model.js";
+import ClientModel from "../models/oauthClient.model.js";
 
 const server = oauth2orize.createServer();
 
@@ -10,7 +10,7 @@ const server = oauth2orize.createServer();
 server.grant(
   oauth2orize.grant.code((client, redirectUri, user, ares, done) => {
     // Kiểm tra client hợp lệ
-    Client.findById(client.id, (err, foundClient) => {
+    ClientModel.findById(client.id, (err, foundClient) => {
       if (err || !foundClient) return done(new Error("Client không hợp lệ"));
 
       // Kiểm tra redirectUri
@@ -19,7 +19,7 @@ server.grant(
       }
 
       // Kiểm tra xem người dùng có hợp lệ không
-      User.findById(user.id, (err, foundUser) => {
+      UserModel.findById(user.id, (err, foundUser) => {
         if (err || !foundUser)
           return done(new Error("Người dùng không hợp lệ"));
 
@@ -46,7 +46,7 @@ server.exchange(
         if (err || !foundClient) return done(new Error("Client không hợp lệ"));
 
         // Tìm người dùng dựa trên payload
-        User.findById(payload.userId, (err, foundUser) => {
+        UserModel.findById(payload.userId, (err, foundUser) => {
           if (err || !foundUser)
             return done(new Error("Người dùng không hợp lệ"));
 
@@ -63,4 +63,4 @@ server.exchange(
   })
 );
 
-module.exports = server;
+export default server;

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const oauthClientSchema = new mongoose.Schema({
   name: {
@@ -41,4 +41,4 @@ const oauthClientSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("OAuthClient", oauthClientSchema);
+export default mongoose.model("OAuthClient", oauthClientSchema);

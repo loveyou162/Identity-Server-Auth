@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
+import jwt from "jsonwebtoken";
 
 const authenticateJWT = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+  const token = req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) return res.sendStatus(401); // Nếu không có token, trả về lỗi 401
 
@@ -12,4 +12,4 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-module.exports = authenticateJWT;
+export default authenticateJWT;

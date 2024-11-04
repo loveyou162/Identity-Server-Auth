@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const oauthScopeSchema = new mongoose.Schema({
   scope: {
@@ -15,4 +15,4 @@ const oauthScopeSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("OAuthScope", oauthScopeSchema);
+export default mongoose.model("OAuthScope", oauthScopeSchema);

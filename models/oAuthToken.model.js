@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const oauthTokenSchema = new mongoose.Schema({
   accessToken: {
@@ -31,4 +31,4 @@ const oauthTokenSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("OAuthToken", oauthTokenSchema);
+export default mongoose.model("OAuthToken", oauthTokenSchema);

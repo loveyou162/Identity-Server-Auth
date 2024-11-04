@@ -1,19 +1,19 @@
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const User = require('../models/user.model');
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import UserModel from "../models/user.model.js";
 
-
-
-passport.use(new LocalStrategy(async (username, password, done) => {
-  try {
-    const user = await User.findOne({ username });
-    if (!user || !(await user.comparePassword(password))) {
-      return done(null, false, { message: 'Incorrect credentials.' });
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await UserModel.findOne({ username });
+      if (!user || !(await user.comparePassword(password))) {
+        return done(null, false, { message: "Incorrect credentials." });
+      }
+      return done(null, user);
+    } catch (error) {
+      return done(error);
     }
-    return done(null, user);
-  } catch (error) {
-    return done(error);
-  }
-}));
+  })
+);
 
-module.exports = passport;
+export default passport;
