@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "clientId": "14605dfbdc7e01a23b3b3effc1fc070d",
-    "username": "LeliaBrooks",
+    "email": "rulnonja@ak.sl@example.com",
     "password": "password123"
 }
 ##################/oauth/token

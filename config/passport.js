@@ -7,11 +7,11 @@ import jwt from "jsonwebtoken"; // Nhớ import jwt nếu bạn chưa làm
 // Định nghĩa Local Strategy
 passport.use(
   new LocalStrategy(
-    { usernameField: "username", passwordField: "password" }, // Chỉ định tên trường
-    async (username, password, done) => {
+    { usernameField: "email", passwordField: "password" }, // Chỉ định tên trường
+    async (email, password, done) => {
       try {
-        // Tìm người dùng theo username
-        const user = await UserModel.findOne({ username });
+        // Tìm người dùng theo email
+        const user = await UserModel.findOne({ email });
         console.log(user.password);
         // Nếu không tìm thấy người dùng, trả về thông báo
         if (!user) {
