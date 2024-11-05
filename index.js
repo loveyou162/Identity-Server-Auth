@@ -56,8 +56,13 @@ app.set("views", path.join(__dirname, "views"));
 // Sử dụng route xác thực
 
 app.use("/api/auth", authRoutes);
+<<<<<<< HEAD
 app.use("/api/client", clientRoutes);
 app.use("/api/user", userRouter);
+=======
+app.use('/api/client',clientRoutes);
+app.use('/api/user',userRouter)
+>>>>>>> 32f714747cda4346901c3c96b0537409be87a8dc
 initWebRoutes(app);
 
 // Khởi động server

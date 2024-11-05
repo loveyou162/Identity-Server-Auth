@@ -9,7 +9,6 @@ const addUser = catchAsyncError(async (req, res, next) => {
   console.log(req.body);
   const addUser = new userModel(req.body);
   await addUser.save();
-
   res.status(201).json({ message: "success", addUser });
 });
 
