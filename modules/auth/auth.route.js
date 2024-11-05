@@ -5,7 +5,6 @@ import {
   postLogin,
   authorizeCode,
   refreshToken,
-  exchangeAuthorizationCodeForToken,
   postRegister,
   callback,
   authCode,

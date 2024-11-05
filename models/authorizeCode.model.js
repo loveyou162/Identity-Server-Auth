@@ -22,8 +22,9 @@ const authCodeSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true,
-    index: { expires: "0" },
   },
 });
+// Tạo một chỉ mục TTL dựa trên thuộc tính expiresAt
+authCodeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export default mongoose.model("authorizeCode", authCodeSchema);

@@ -9,6 +9,7 @@ import AuthorizationCode from "../../models/authorizeCode.model.js";
 import crypto from "crypto";
 // Thư viện JWT
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
 import AuthCode from "../../models/authorizeCode.model.js";
 const viewLogin = (req, res) => {
@@ -19,10 +20,10 @@ const viewLogin = (req, res) => {
   res.render("login");
 };
 
-const clientId = "YOUR_CLIENT_ID";
+// const clientId = "YOUR_CLIENT_ID";
 const clientSecret = "YOUR_CLIENT_SECRET";
 
-const redirectUri = "http://localhost:3000/auth/oauth/callback";
+// const redirectUri = "http://localhost:3000/auth/oauth/callback";
 const authorizationServerUrl = "http://localhost:3000";
 
 //tạo access token
@@ -74,12 +75,7 @@ const postRegister = async (req, res) => {
   }
 };
 
-const storeAuthorizationCode = async (
-  code,
-  clientId,
-  userId,
-  expiresIn = 15000
-) => {
+const storeAuthorizationCode = async (code, clientId, userId, expiresIn) => {
   const expirationTime = Date.now() + expiresIn * 1000; // Thời gian hết hạn
   const authorizationCode = new AuthCode({
     code,
@@ -90,6 +86,7 @@ const storeAuthorizationCode = async (
   await authorizationCode.save();
 };
 
+//method xác thực code
 const verifyAuthorizationCode = async (code) => {
   try {
     // Tìm mã xác thực trong cơ sở dữ liệu
@@ -113,7 +110,7 @@ const verifyAuthorizationCode = async (code) => {
     }
 
     // Đánh dấu mã là đã sử dụng
-    await AuthCode.updateOne({ code }, { used: true });
+    await AuthCode.updateOne({ code }, { used: false });
     console.log("Mã xác thực đã được xác nhận và đánh dấu là đã sử dụng");
 
     return { valid: true, userId: authCode.userId };
@@ -123,9 +120,134 @@ const verifyAuthorizationCode = async (code) => {
   }
 };
 
+const refreshToken = async (req, res) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token) {
+    return res.status(400).json({ message: "Refresh token is required" });
+  }
+
+  try {
+    // Xác thực Refresh Token
+    const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET);
+    const user = await UserModel.findById(decoded.userId);
+
+    // Kiểm tra Refresh Token trong cơ sở dữ liệu
+    if (!user || user.refreshToken !== refresh_token) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+    // Tạo JWT cho người dùng
+    const tokenPayload = {
+      userId: user._id, // Sử dụng userId thực tế
+      email: user.email, // Có thể thêm thông tin khác nếu cần
+    };
+    // Tạo Access Token mới
+    const newAccessToken = generateAccessToken(tokenPayload);
+    res.json({ access_token: newAccessToken, expires_in: 3600 });
+  } catch (error) {
+    console.log(error);
+    res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
+//bước1 Endpoint để bắt đầu quy trình OAuth
+// /api/auth/oauth/authorize
+const authorizeCode = async (req, res) => {
+  const scope = "email profile";
+  const { clientId, redirectUri } = req.body; // Các quyền yêu cầu
+  console.log(scope);
+  const state = Math.random().toString(36).substring(7); // Tạo chuỗi ngẫu nhiên cho state
+
+  // Kiểm tra xem client có hợp lệ không
+  const client = await ClientModel.findOne({ clientId });
+  if (!client || client.redirectUri !== redirectUri) {
+    return res.status(400).json({ message: "Invalid client or redirect URI" });
+  }
+
+  // Kiểm tra xem người dùng có xác thực không
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  const authUrl =
+    `${authorizationServerUrl}/authorize?` +
+    `client_id=${clientId}&` +
+    `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+    `response_type=code&` +
+    `scope=${encodeURIComponent(scope)}&` +
+    `state=${state}`;
+
+  res.redirect(authUrl);
+};
+
+//bước 2 Đăng nhập người dùng
+// /api/auth/login
+const postLogin = async (req, res) => {
+  const user = req.user; // `req.user` sẽ được điền bởi passport nếu xác thực thành công
+  console.log(49, user);
+  const code = generateAuthorizationCode();
+  storeAuthorizationCode(code, clientId, user._id, 20);
+  console.log(code);
+  res.redirect(`http://localhost:3001/?code=${code}`);
+};
+
+//bước 3 Hàm callback để nhận mã xác thực và lấy token truy cập
+// /api/auth/oauth/callback
+const callback = async (req, res) => {
+  const { code, state } = req.body;
+  console.log(code);
+  // Kiểm tra state nếu cần
+  // TODO: So sánh state từ yêu cầu với giá trị đã lưu trữ để ngăn chặn CSRF
+
+  try {
+    // Xác thực mã xác thực
+    const verificationResult = await verifyAuthorizationCode(code);
+    console.log({ verificationResult });
+    if (!verificationResult.valid) {
+      return res.status(400).json({ message: verificationResult.message });
+    }
+
+    // Nếu mã xác thực hợp lệ, lấy token truy cập từ máy chủ OAuth
+    const response = await axios.post(
+      `${authorizationServerUrl}/api/auth/oauth/token`,
+      { code },
+      {
+        headers: {
+          "Content-Type": "application/json", // Đảm bảo định dạng dữ liệu là JSON
+          // Authorization: `Basic ${Buffer.from(
+          //   `${clientId}:${clientSecret}`
+          // ).toString("base64")}`, // Nếu cần sử dụng Basic Auth
+          // Bạn có thể thêm các header khác nếu cần
+        },
+        params: {
+          code,
+          grant_type: "authorization_code", //change
+          redirect_uri: redirectUri, //change
+          client_id: clientId, //change
+          client_secret: clientSecret, //change
+        },
+      }
+    );
+
+    const { access_token, refresh_token, expires_in } = response.data;
+
+    // Xử lý token (lưu vào cơ sở dữ liệu, phiên người dùng, v.v.)
+    // TODO: Lưu token vào cơ sở dữ liệu hoặc phiên người dùng theo nhu cầu
+    res.json({
+      access_token,
+      refresh_token,
+      expires_in,
+    });
+  } catch (error) {
+    console.error("Error getting access token:", error);
+    res.status(500).send("Error getting access token");
+  }
+};
+
+//bước 4
+// /api/auth/oauth/token
 const authCode = async (req, res) => {
   const { code } = req.body;
-  console.log({ code });
+  console.log(129, { code });
   // Xác thực mã xác thực
   const verificationResult = await verifyAuthorizationCode(code);
 
@@ -174,108 +296,7 @@ const authCode = async (req, res) => {
     res.status(500).send("Error getting access token");
   }
 };
-
-const refreshToken = async (req, res) => {
-  const { refresh_token } = req.body;
-  if (!refresh_token) {
-    return res.status(400).json({ message: "Refresh token is required" });
-  }
-
-  try {
-    // Xác thực Refresh Token
-    const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET);
-    const user = await UserModel.findById(decoded.userId);
-
-    // Kiểm tra Refresh Token trong cơ sở dữ liệu
-    if (!user || user.refreshToken !== refresh_token) {
-      return res.status(403).json({ message: "Invalid refresh token" });
-    }
-    // Tạo JWT cho người dùng
-    const tokenPayload = {
-      userId: user._id, // Sử dụng userId thực tế
-      email: user.email, // Có thể thêm thông tin khác nếu cần
-    };
-    // Tạo Access Token mới
-    const newAccessToken = generateAccessToken(tokenPayload);
-    res.json({ access_token: newAccessToken, expires_in: 3600 });
-  } catch (error) {
-    console.log(error);
-    res.status(403).json({ message: "Invalid or expired refresh token" });
-  }
-};
-
-// Đăng nhập người dùng
-const postLogin = async (req, res) => {
-  const user = req.user; // `req.user` sẽ được điền bởi passport nếu xác thực thành công
-  console.log(49, user);
-  const code = generateAuthorizationCode();
-  storeAuthorizationCode(code, clientId, user._id);
-  console.log(code);
-  res.redirect(`http://localhost:3001/?code=${code}`);
-};
-
-// Endpoint để bắt đầu quy trình OAuth
-export const authorizeCode = async (req, res) => {
-  const scope = "email profile"; // Các quyền yêu cầu
-  console.log(scope);
-  const state = Math.random().toString(36).substring(7); // Tạo chuỗi ngẫu nhiên cho state
-
-  const authUrl =
-    `${authorizationServerUrl}/authorize?` +
-    `client_id=${clientId}&` +
-    `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-    `response_type=code&` +
-    `scope=${encodeURIComponent(scope)}&` +
-    `state=${state}`;
-
-  res.redirect(authUrl);
-};
-
-// Hàm callback để nhận mã xác thực và lấy token truy cập
-const callback = async (req, res) => {
-  const { code, state } = req.query;
-
-  // Kiểm tra state nếu cần
-  // TODO: So sánh state từ yêu cầu với giá trị đã lưu trữ để ngăn chặn CSRF
-
-  try {
-    // Xác thực mã xác thực
-    const verificationResult = await verifyAuthorizationCode(code);
-
-    if (!verificationResult.valid) {
-      return res.status(400).json({ message: verificationResult.message });
-    }
-
-    // Nếu mã xác thực hợp lệ, lấy token truy cập từ máy chủ OAuth
-    const response = await axios.post(
-      `${authorizationServerUrl}/auth/oauth/token`,
-      null,
-      {
-        params: {
-          code,
-          grant_type: "authorization_code",
-          redirect_uri: redirectUri,
-          client_id: clientId,
-          client_secret: clientSecret,
-        },
-      }
-    );
-
-    const { access_token, refresh_token, expires_in } = response.data;
-
-    // Xử lý token (lưu vào cơ sở dữ liệu, phiên người dùng, v.v.)
-    // TODO: Lưu token vào cơ sở dữ liệu hoặc phiên người dùng theo nhu cầu
-    res.json({
-      access_token,
-      refresh_token,
-      expires_in,
-    });
-  } catch (error) {
-    console.error("Error getting access token:", error);
-    res.status(500).send("Error getting access token");
-  }
-};
-
+/////////////////////////////////
 // Cấp mã ủy quyền (Authorization Code)
 const authorize = async (req, res) => {
   const { clientId, redirectUri } = req.body;
@@ -345,11 +366,10 @@ const exchangeAuthorizationCodeForToken = async (req, res) => {
 
 export {
   postLogin,
-  authorize,
-  exchangeAuthorizationCodeForToken,
   postRegister,
   callback,
   viewLogin,
   refreshToken,
   authCode,
+  authorizeCode,
 };
