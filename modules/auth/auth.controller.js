@@ -11,6 +11,13 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
 import AuthCode from "../../models/authorizeCode.model.js";
+const viewLogin = (req, res) => {
+  let socialOption = req.query.with;
+  if (socialOption) {
+    return res.redirect(`/auth/${socialOption}`);
+  }
+  res.render("login");
+};
 
 // Đăng ký
 const postRegister = async (req, res) => {
@@ -293,4 +300,5 @@ export {
   exchangeAuthorizationCodeForToken,
   postRegister,
   callback,
+  viewLogin,
 };

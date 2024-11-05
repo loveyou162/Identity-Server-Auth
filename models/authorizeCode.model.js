@@ -15,8 +15,9 @@ const authCodeSchema = new mongoose.Schema({
     ref: "User",
   },
   expiresAt: {
-    type: Number,
+    type: Date,
     required: true,
+    index: { expires: "0" },
   },
 });
 
