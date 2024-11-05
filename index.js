@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 import "./config/passport.js";
 import initWebRoutes from "./routes/web.js";
 
+import clientRoutes from './modules/config-client/client.route.js';
 // Cấu hình dotenv để sử dụng biến môi trường
 dotenv.config();
 
@@ -21,14 +22,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-<<<<<<< HEAD
 // Cấu hình EJS làm view engine
 app.set("view engine", "ejs");
 app.set("views", "./views");
 
-=======
-// Cấu hình session
->>>>>>> f6f40c1b56304610bd167c5b60728cdd582e1fad
 app.use(
     session({
         secret: process.env.SESSION_SECRET, // Lấy giá trị từ biến môi trường
@@ -36,12 +33,7 @@ app.use(
         saveUninitialized: false,
     })
 );
-<<<<<<< HEAD
 app.use(express.static("public"));
-=======
-
-const PORT = process.env.PORT || 3000; // Cổng cho Authorization Server
->>>>>>> f6f40c1b56304610bd167c5b60728cdd582e1fad
 
 // Route để hiển thị trang đăng nhập
 app.get("/authorize", (req, res) => {
@@ -66,9 +58,10 @@ app.set("views", path.join(__dirname, "views"));
 
 // Sử dụng route xác thực
 
-import './config/passport.google.js';
+//import './config/passport.google.js';
 
 app.use("/api/auth", authRoutes);
+app.use('/api/client',clientRoutes);
 initWebRoutes(app);
 
 
