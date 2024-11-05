@@ -64,7 +64,7 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use("/api/auth", authRoutes);
 app.use('/api/client',clientRoutes);
-app.use('api/user',userRouter)
+app.use('/api/user',userRouter)
 initWebRoutes(app);
 
 // Khởi động server
