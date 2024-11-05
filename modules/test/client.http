@@ -17,3 +17,6 @@ Content-Type: application/json
     "fullName": "Phạm Đình Brooks",
     "provider": "google"
 }
+#####################
+GET http://localhost:3000/api/user
+

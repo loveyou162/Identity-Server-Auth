@@ -3,7 +3,6 @@ import { AppError } from "../../utils/AppError.js";
 import { deleteOne } from "../../handlers/factor.js";
 import { ApiFeatures } from "../../utils/ApiFeatures.js";
 import userModel from "../../models/user.model.js";
-import bcrypt from "bcrypt";
 
 const addUser = catchAsyncError(async (req, res, next) => {
   console.log(req.body);

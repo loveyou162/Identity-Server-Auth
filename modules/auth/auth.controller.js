@@ -3,7 +3,6 @@ import UserModel from "../../models/user.model.js";
 
 // Model client (nếu có)
 import ClientModel from "../../models/oauthClient.model.js";
-import bcrypt from "bcrypt";
 // Model mã ủy quyền
 import AuthorizationCode from "../../models/authorizeCode.model.js";
 import crypto from "crypto";
@@ -57,11 +56,10 @@ const postRegister = async (req, res) => {
       return res.status(400).send({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
     // Tạo người dùng mới
     const newUser = new UserModel({
       username,
-      password: hashedPassword,
+      password,
       email,
       fullName,
     });
@@ -104,14 +102,8 @@ const verifyAuthorizationCode = async (code) => {
       return { valid: false, message: "Code expired" };
     }
 
-    // Kiểm tra xem mã đã được sử dụng chưa
-    if (authCode.used) {
-      console.log("Mã xác thực đã được sử dụng trước đó");
-      return { valid: false, message: "Code has already been used" };
-    }
-
     // Đánh dấu mã là đã sử dụng
-    await AuthCode.updateOne({ code }, { used: false });
+    await AuthCode.updateOne({ code }, { used: true });
     console.log("Mã xác thực đã được xác nhận và đánh dấu là đã sử dụng");
 
     return { valid: true, userId: authCode.userId };
@@ -126,7 +118,6 @@ const refreshToken = async (req, res) => {
   if (!refresh_token) {
     return res.status(400).json({ message: "Refresh token is required" });
   }
-
   try {
     // Xác thực Refresh Token
     const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET);
@@ -143,6 +134,9 @@ const refreshToken = async (req, res) => {
     };
     // Tạo Access Token mới
     const newAccessToken = generateAccessToken(tokenPayload);
+    user.accessToken = newAccessToken;
+    await user.save();
+
     res.json({ access_token: newAccessToken, expires_in: 3600 });
   } catch (error) {
     console.log(error);
@@ -212,6 +206,10 @@ const callback = async (req, res) => {
       return res.status(400).json({ message: verificationResult.message });
     }
 
+    const authCode = await AuthCode.findOne({ code });
+    const Client = await ClientModel.findOne({ clientId: authCode.clientId });
+    console.log(Client);
+
     // Nếu mã xác thực hợp lệ, lấy token truy cập từ máy chủ OAuth
     const response = await axios.post(
       `${authorizationServerUrl}/api/auth/oauth/token`,
@@ -227,8 +225,8 @@ const callback = async (req, res) => {
         params: {
           code,
           grant_type: "authorization_code", //change
-          redirect_uri: redirectUri, //change
-          client_id: clientId, //change
+          redirect_uri: Client.redirectUri, //change
+          client_id: Client.clientId, //change
           client_secret: clientSecret, //change
         },
       }
