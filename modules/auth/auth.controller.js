@@ -12,6 +12,7 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 
 import AuthCode from "../../models/authorizeCode.model.js";
+import { log } from "console";
 const viewLogin = (req, res) => {
   let socialOption = req.query.with;
   if (socialOption) {
@@ -182,12 +183,17 @@ const authorizeCode = async (req, res) => {
 //bước 2 Đăng nhập người dùng
 // /api/auth/login
 const postLogin = async (req, res) => {
-  const user = req.user; // `req.user` sẽ được điền bởi passport nếu xác thực thành công
+  const user = req.user;
+  const { clientId } = req.body;
+  // `req.user` sẽ được điền bởi passport nếu xác thực thành công
   console.log(49, user);
+  const Client = await ClientModel.findOne({ clientId });
+  console.log({ Client });
+
   const code = generateAuthorizationCode();
   storeAuthorizationCode(code, clientId, user._id, 20);
   console.log(code);
-  res.redirect(`http://localhost:3001/?code=${code}`);
+  res.redirect(`${Client.redirectUri}?code=${code}`);
 };
 
 //bước 3 Hàm callback để nhận mã xác thực và lấy token truy cập
@@ -282,6 +288,8 @@ const authCode = async (req, res) => {
 
     const accessToken = generateAccessToken(tokenPayload);
     const refreshToken = generateRefreshToken(tokenPayload);
+
+    user.accessToken = accessToken;
     // Lưu Refresh Token vào cơ sở dữ liệu hoặc bộ nhớ
     user.refreshToken = refreshToken;
     await user.save();

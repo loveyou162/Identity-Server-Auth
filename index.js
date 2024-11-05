@@ -9,9 +9,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import "./config/passport.js";
 import initWebRoutes from "./routes/web.js";
-import userRouter from './modules/user/user.routes.js'
+import userRouter from "./modules/user/user.routes.js";
 
-import clientRoutes from './modules/config-client/client.route.js';
+import clientRoutes from "./modules/config-client/client.route.js";
 // Cấu hình dotenv để sử dụng biến môi trường
 dotenv.config();
 
@@ -22,11 +22,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Cấu hình EJS làm view engine
-app.set("view engine", "ejs");
-app.set("views", "./views");
-
 
 app.use(
   session({
@@ -60,11 +55,9 @@ app.set("views", path.join(__dirname, "views"));
 
 // Sử dụng route xác thực
 
-
-
 app.use("/api/auth", authRoutes);
-app.use('/api/client',clientRoutes);
-app.use('api/user',userRouter)
+app.use("/api/client", clientRoutes);
+app.use("/api/user", userRouter);
 initWebRoutes(app);
 
 // Khởi động server

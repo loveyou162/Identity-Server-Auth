@@ -2,10 +2,11 @@ import { catchAsyncError } from "../../utils/catchAsyncError.js";
 import { AppError } from "../../utils/AppError.js";
 import { deleteOne } from "../../handlers/factor.js";
 import { ApiFeatures } from "../../utils/ApiFeatures.js";
-import userModel  from "../../models/user.model.js";
+import userModel from "../../models/user.model.js";
 import bcrypt from "bcrypt";
 
 const addUser = catchAsyncError(async (req, res, next) => {
+  console.log(req.body);
   const addUser = new userModel(req.body);
   await addUser.save();
 
@@ -53,15 +54,17 @@ const deleteUser = deleteOne(userModel, "user");
 
 export const createUser = async (githubUser) => {
   try {
-    const existingUser = await userModel.findOne({ authSocialId: githubUser.id });
+    const existingUser = await userModel.findOne({
+      authSocialId: githubUser.id,
+    });
 
     if (existingUser) {
-      console.log('Người dùng đã tồn tại, đăng nhập thay vì tạo tài khoản.');
+      console.log("Người dùng đã tồn tại, đăng nhập thay vì tạo tài khoản.");
       return existingUser;
     }
     const newUser = fillDataUser(githubUser);
     const savedUser = await newUser.save();
-    console.log('Đã tạo mới user github.');
+    console.log("Đã tạo mới user github.");
     return savedUser;
   } catch (error) {
     console.error("Error creating or finding user:", error);
