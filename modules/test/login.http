@@ -14,7 +14,8 @@ POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-    "username": "exampleUser",
+    "clientId": "14605dfbdc7e01a23b3b3effc1fc070d",
+    "username": "LeliaBrooks",
     "password": "password123"
 }
 ##################/oauth/token
@@ -22,15 +23,28 @@ POST http://localhost:3000/api/auth/oauth/token
 Content-Type: application/json
 
 {
-    "code": "40493d8e7f69136ce2577440791826a85278f23a"
+    "code": "16d0e3592febd3be0aeaa5af99644d16a64e5d67"
+}
+##################/oauth/callback
+POST http://localhost:3000/api/auth/oauth/callback
+Content-Type: application/json
+
+{
+    "code": "8e4fce369e4857978813e74bef9ae64ae9d8d440"
 }
 ##################/oauth/token
 POST http://localhost:3000/api/auth/oauth/refreshToken
 Content-Type: application/json
 
 {
-      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI4ODMzYjYyYTQzNzRhMjBhOGYyN2UiLCJlbWFpbCI6ImV4YW1wbGVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA3NzM2MTcsImV4cCI6MTczMDc4MDgxN30.X5KWI0YxVwOvOcuYnCdWXj1tHoC_MvbttnAnMtz8CxM"
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsQGV4YW1wbGUuY29tIiwiaWF0IjoxNzMwNzkzMTkwLCJleHAiOjE3MzEzOTc5OTB9.gUWQ8ZLceqFgzxUwctSpviLqq_guUsomnRIt5SALP4Q"
 }
 
 ##################login
 POST http://localhost:3000/api/auth/oauth/authorize
+Content-Type: application/json
+
+{
+    "clientId": "d59410953cac1a6b34ff71fb0a65082e7077938c",
+    "redirectUri": "http://localhost:3000/auth/oauth/callback"
+}

@@ -15,10 +15,7 @@ const oauthClientSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  clientName: {
-    type: String,
-    required: true,
-  },
+
   redirectUri: {
     type: String,
     required: true,
