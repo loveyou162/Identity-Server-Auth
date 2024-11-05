@@ -10,6 +10,14 @@ import AuthorizationCode from "../../models/oAuthToken.model.js";
 // Thư viện JWT
 import jwt from "jsonwebtoken";
 
+const viewLogin = (req, res) => {
+  let socialOption = req.query.with;
+  if(socialOption){
+    return res.redirect(`/auth/${socialOption}`);
+  }
+  res.render("login");
+}
+
 // Đăng ký
 const postRegister = async (req, res) => {
   const { username, password, email, fullName, provider } = req.body;
@@ -138,4 +146,5 @@ export {
   authorize,
   exchangeAuthorizationCodeForToken,
   postRegister,
+  viewLogin,
 };
