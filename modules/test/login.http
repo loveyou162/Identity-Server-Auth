@@ -8,3 +8,22 @@ Content-Type: application/json
     "fullName": "Phạm Đình Thắng",
     "provider": "google"
 }
+
+##################login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "username": "exampleUser",
+    "password": "password123"
+}
+##################/oauth/token
+POST http://localhost:3000/api/auth/oauth/token
+Content-Type: application/json
+
+{
+    "code": "7e7140754943e84602ab755fdf10946b56d1a039"
+}
+
+##################login
+POST http://localhost:3000/api/auth/oauth/authorize

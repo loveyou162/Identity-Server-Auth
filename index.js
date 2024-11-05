@@ -13,6 +13,10 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+// Cấu hình EJS làm view engine
+app.set("view engine", "ejs");
+app.set("views", "./views");
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET, // Lấy giá trị từ biến môi trường
@@ -20,8 +24,14 @@ app.use(
     saveUninitialized: false,
   })
 );
-const PORT = process.env.PORT || 3000; // Cổng cho Authorization Server
+app.use(express.static("public"));
 
+// Route để hiển thị trang đăng nhập
+app.get("/authorize", (req, res) => {
+  res.render("login");
+});
+
+const PORT = process.env.PORT || 3000; // Cổng cho Authorization Server
 // Kết nối với MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
