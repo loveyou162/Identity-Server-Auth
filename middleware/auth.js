@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import {catchAsyncError} from "../utils/catchAsyncError.js"
 
 const authenticateJWT = (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -12,4 +13,18 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-export default authenticateJWT;
+const allowedTo = (...roles) => {
+  return catchAsyncError(async (req, res, next) => {
+    if (!roles.includes(req.user.role))
+      return next(
+        new AppError(
+          `You are not authorized to access this route. Your are ${req.user.role}`,
+          401
+        )
+      );
+    next();
+  });
+};
+
+
+export { authenticateJWT ,allowedTo};

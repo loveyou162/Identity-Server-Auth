@@ -9,7 +9,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import "./config/passport.js";
 import initWebRoutes from "./routes/web.js";
+import userRouter from './modules/user/user.routes.js'
 
+import clientRoutes from './modules/config-client/client.route.js';
 // Cấu hình dotenv để sử dụng biến môi trường
 dotenv.config();
 
@@ -25,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", "./views");
 
-// Cấu hình session
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET, // Lấy giá trị từ biến môi trường
@@ -56,7 +58,13 @@ app.use(passport.session());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+// Sử dụng route xác thực
+
+
+
 app.use("/api/auth", authRoutes);
+app.use('/api/client',clientRoutes);
+app.use('api/user',userRouter)
 initWebRoutes(app);
 
 // Khởi động server
