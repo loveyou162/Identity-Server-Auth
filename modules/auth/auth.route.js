@@ -4,7 +4,7 @@ import oauthServer from "../../services/oauthService.js";
 import {
   postLogin,
   authorizeCode,
-  authorize,
+  refreshToken,
   exchangeAuthorizationCodeForToken,
   postRegister,
   callback,
@@ -21,6 +21,7 @@ router.post(
 );
 
 router.post("/oauth/token", authCode);
+router.post("/oauth/refreshToken", refreshToken);
 
 // Đăng ký
 router.post("/register", postRegister);

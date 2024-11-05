@@ -29,6 +29,19 @@ const userSchema = new mongoose.Schema({
     enum: ["local", "google"],
     default: "local",
   },
+  role: {
+    type: String,
+    enum: ["admin", "user"],
+    default: "user",
+  },
+  accessToken: {
+    type: String,
+    default: null,
+  },
+  refreshToken: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

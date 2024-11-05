@@ -22,7 +22,14 @@ POST http://localhost:3000/api/auth/oauth/token
 Content-Type: application/json
 
 {
-    "code": "74fcf5edec8f9739b0d4bb527acf6b422cf019f1"
+    "code": "40493d8e7f69136ce2577440791826a85278f23a"
+}
+##################/oauth/token
+POST http://localhost:3000/api/auth/oauth/refreshToken
+Content-Type: application/json
+
+{
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI4ODMzYjYyYTQzNzRhMjBhOGYyN2UiLCJlbWFpbCI6ImV4YW1wbGVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA3NzM2MTcsImV4cCI6MTczMDc4MDgxN30.X5KWI0YxVwOvOcuYnCdWXj1tHoC_MvbttnAnMtz8CxM"
 }
 
 ##################login

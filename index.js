@@ -21,27 +21,19 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-<<<<<<< HEAD
 // Cấu hình EJS làm view engine
 app.set("view engine", "ejs");
 app.set("views", "./views");
 
-=======
 // Cấu hình session
->>>>>>> f6f40c1b56304610bd167c5b60728cdd582e1fad
 app.use(
-    session({
-        secret: process.env.SESSION_SECRET, // Lấy giá trị từ biến môi trường
-        resave: false,
-        saveUninitialized: false,
-    })
+  session({
+    secret: process.env.SESSION_SECRET, // Lấy giá trị từ biến môi trường
+    resave: false,
+    saveUninitialized: false,
+  })
 );
-<<<<<<< HEAD
 app.use(express.static("public"));
-=======
-
-const PORT = process.env.PORT || 3000; // Cổng cho Authorization Server
->>>>>>> f6f40c1b56304610bd167c5b60728cdd582e1fad
 
 // Route để hiển thị trang đăng nhập
 app.get("/authorize", (req, res) => {
@@ -51,9 +43,9 @@ app.get("/authorize", (req, res) => {
 const PORT = process.env.PORT || 3000; // Cổng cho Authorization Server
 // Kết nối với MongoDB
 mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB connected for Auth Server"))
-    .catch((err) => console.log("MongoDB connection error:", err));
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected for Auth Server"))
+  .catch((err) => console.log("MongoDB connection error:", err));
 
 // Cấu hình middleware
 app.use(morgan("dev"));
@@ -64,15 +56,10 @@ app.use(passport.session());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Sử dụng route xác thực
-
-import './config/passport.google.js';
-
 app.use("/api/auth", authRoutes);
 initWebRoutes(app);
 
-
 // Khởi động server
 app.listen(PORT, () => {
-    console.log(`Authorization Server is running on http://localhost:${PORT}`);
+  console.log(`Authorization Server is running on http://localhost:${PORT}`);
 });

@@ -19,6 +19,29 @@ const viewLogin = (req, res) => {
   res.render("login");
 };
 
+const clientId = "YOUR_CLIENT_ID";
+const clientSecret = "YOUR_CLIENT_SECRET";
+
+const redirectUri = "http://localhost:3000/auth/oauth/callback";
+const authorizationServerUrl = "http://localhost:3000";
+
+//tạo access token
+const generateAccessToken = (data) => {
+  return jwt.sign(data, process.env.JWT_SECRET, { expiresIn: "1h" });
+};
+
+//tạo refresh token
+const generateRefreshToken = (data) => {
+  return jwt.sign(data, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: "7d",
+  });
+};
+
+//tạo code
+function generateAuthorizationCode() {
+  return crypto.randomBytes(20).toString("hex"); // Tạo mã ngẫu nhiên 40 ký tự
+}
+
 // Đăng ký
 const postRegister = async (req, res) => {
   const { username, password, email, fullName, provider } = req.body;
@@ -33,7 +56,6 @@ const postRegister = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(hashedPassword);
     // Tạo người dùng mới
     const newUser = new UserModel({
       username,
@@ -52,16 +74,12 @@ const postRegister = async (req, res) => {
   }
 };
 
-function generateAuthorizationCode() {
-  return crypto.randomBytes(20).toString("hex"); // Tạo mã ngẫu nhiên 40 ký tự
-}
-
-async function storeAuthorizationCode(
+const storeAuthorizationCode = async (
   code,
   clientId,
   userId,
-  expiresIn = 60000
-) {
+  expiresIn = 15000
+) => {
   const expirationTime = Date.now() + expiresIn * 1000; // Thời gian hết hạn
   const authorizationCode = new AuthCode({
     code,
@@ -70,9 +88,9 @@ async function storeAuthorizationCode(
     expiresAt: expirationTime,
   });
   await authorizationCode.save();
-}
+};
 
-async function verifyAuthorizationCode(code) {
+const verifyAuthorizationCode = async (code) => {
   try {
     // Tìm mã xác thực trong cơ sở dữ liệu
     const authCode = await AuthCode.findOne({ code });
@@ -81,26 +99,33 @@ async function verifyAuthorizationCode(code) {
       return { valid: false, message: "Invalid code" };
     }
 
-    // Kiểm tra thời gian hết hạn
+    // Kiểm tra xem mã đã hết hạn chưa
     if (Date.now() > authCode.expiresAt) {
-      console.log("đã xóa code");
+      console.log("Mã xác thực đã hết hạn và sẽ được xóa");
       await AuthCode.deleteOne({ code }); // Xóa mã hết hạn
       return { valid: false, message: "Code expired" };
     }
-    console.log("đã xóa code1");
 
-    // Đảm bảo mã chỉ được sử dụng một lần
-    // await AuthCode.deleteOne({ code }); // Xóa mã khi đã sử dụng
+    // Kiểm tra xem mã đã được sử dụng chưa
+    if (authCode.used) {
+      console.log("Mã xác thực đã được sử dụng trước đó");
+      return { valid: false, message: "Code has already been used" };
+    }
+
+    // Đánh dấu mã là đã sử dụng
+    await AuthCode.updateOne({ code }, { used: true });
+    console.log("Mã xác thực đã được xác nhận và đánh dấu là đã sử dụng");
+
     return { valid: true, userId: authCode.userId };
   } catch (error) {
-    console.error("Error verifying authorization code:", error);
+    console.error("Lỗi xác thực mã xác thực:", error);
     return { valid: false, message: "Internal server error" };
   }
-}
+};
 
-export const authCode = async (req, res) => {
+const authCode = async (req, res) => {
   const { code } = req.body;
-
+  console.log({ code });
   // Xác thực mã xác thực
   const verificationResult = await verifyAuthorizationCode(code);
 
@@ -133,14 +158,15 @@ export const authCode = async (req, res) => {
       email: user.email, // Có thể thêm thông tin khác nếu cần
     };
 
-    const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    }); // Thời gian sống token có thể điều chỉnh
-
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+    // Lưu Refresh Token vào cơ sở dữ liệu hoặc bộ nhớ
+    user.refreshToken = refreshToken;
+    await user.save();
     // Xử lý token (lưu vào cơ sở dữ liệu, phiên người dùng, v.v.)
     res.json({
       access_token: accessToken,
-      refresh_token: null, // Nếu không sử dụng refresh token, có thể để null
+      refresh_token: refreshToken, // Nếu không sử dụng refresh token, có thể để null
       expires_in: 3600, // Thời gian hết hạn của token tính bằng giây
     });
   } catch (error) {
@@ -149,11 +175,34 @@ export const authCode = async (req, res) => {
   }
 };
 
-const clientId = "YOUR_CLIENT_ID";
-const clientSecret = "YOUR_CLIENT_SECRET";
+const refreshToken = async (req, res) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token) {
+    return res.status(400).json({ message: "Refresh token is required" });
+  }
 
-const redirectUri = "http://localhost:3000/auth/oauth/callback";
-const authorizationServerUrl = "http://localhost:3000";
+  try {
+    // Xác thực Refresh Token
+    const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET);
+    const user = await UserModel.findById(decoded.userId);
+
+    // Kiểm tra Refresh Token trong cơ sở dữ liệu
+    if (!user || user.refreshToken !== refresh_token) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+    // Tạo JWT cho người dùng
+    const tokenPayload = {
+      userId: user._id, // Sử dụng userId thực tế
+      email: user.email, // Có thể thêm thông tin khác nếu cần
+    };
+    // Tạo Access Token mới
+    const newAccessToken = generateAccessToken(tokenPayload);
+    res.json({ access_token: newAccessToken, expires_in: 3600 });
+  } catch (error) {
+    console.log(error);
+    res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
 
 // Đăng nhập người dùng
 const postLogin = async (req, res) => {
@@ -162,7 +211,7 @@ const postLogin = async (req, res) => {
   const code = generateAuthorizationCode();
   storeAuthorizationCode(code, clientId, user._id);
   console.log(code);
-  res.redirect(`http://localhost:3000/authorize?code=${code}`);
+  res.redirect(`http://localhost:3001/?code=${code}`);
 };
 
 // Endpoint để bắt đầu quy trình OAuth
@@ -301,4 +350,6 @@ export {
   postRegister,
   callback,
   viewLogin,
+  refreshToken,
+  authCode,
 };

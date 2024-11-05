@@ -14,6 +14,11 @@ const authCodeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  used: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
   expiresAt: {
     type: Date,
     required: true,
