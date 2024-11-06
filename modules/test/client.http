@@ -1,8 +1,9 @@
-POST http://localhost:3000/api/client/register-client
+POST http://localhost:3000/api/client/
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA4NjQ5NTEsImV4cCI6MTczMDg2ODU1MX0.twhCVe6Ye5-3Umh49nZhTz1YXf0T_bmBZc24FHgAVcg
 
 {
-    "name":"lifetek", "redirectUri":"https://facebook.com" ,"scope":"admin", "grantTypes": "authorization_code"
+    "name":"lifetek3", "redirectUri":"https://facebook.com" ,"scope":"admin", "grantTypes": "authorization_code"
 }
 
 #####################
@@ -18,5 +19,8 @@ Content-Type: application/json
     "provider": "google"
 }
 #####################
-GET http://localhost:3000/api/user
-
+GET http://localhost:3000/api/client
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA4NjEwMTEsImV4cCI6MTczMDg2NDYxMX0.OV3k1VYgrv6b8BugoByjEahdSIO7c8UdRZtKcxN8BW8
+#####################
+GET http://localhost:3000/api/client/6729bc4fbd2234161580a011
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA4NjEwMTEsImV4cCI6MTczMDg2NDYxMX0.OV3k1VYgrv6b8BugoByjEahdSIO7c8UdRZtKcxN8BW8

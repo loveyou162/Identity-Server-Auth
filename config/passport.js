@@ -9,6 +9,7 @@ passport.use(
   new LocalStrategy(
     { usernameField: "email", passwordField: "password" }, // Chỉ định tên trường
     async (email, password, done) => {
+      console.log({ email, password });
       try {
         // Tìm người dùng theo email
         const user = await UserModel.findOne({ email });

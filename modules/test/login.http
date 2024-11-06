@@ -14,7 +14,7 @@ POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-    "clientId": "14605dfbdc7e01a23b3b3effc1fc070d",
+    "clientId": "eaf766a96215dc0048e380f6dc3dac9c",
     "email": "rulnonja@ak.slexample.com",
     "password": "password123"
 }
@@ -30,7 +30,7 @@ POST http://localhost:3000/api/auth/oauth/callback
 Content-Type: application/json
 
 {
-    "code": "4a0b2ef40d571d804fa7f0534390a8c7c4ee7ef2"
+    "code": "96610ca71da9af7c93e5279c5ddfbc70c6c252a6"
 }
 ##################/oauth/token
 POST http://localhost:3000/api/auth/oauth/refreshToken

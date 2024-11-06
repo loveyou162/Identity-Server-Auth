@@ -11,7 +11,7 @@ router
     auth.protectedRoutes,
     clientController.registerClient
   )
-  .get(clientController.getAll);
+  .get(auth.protectedRoutes, clientController.getAll);
 
 router
   .route("/:id")
