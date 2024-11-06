@@ -152,9 +152,29 @@
 
   <script>
     $(document).ready(function () {
-      $("#authSocial").on("click", function () {
-        let socialOption = $(this).data("social");
-        window.location.href = `/login?with=${socialOption}`;
+      $("#btn-submit").on("click", function () {
+        let username = $("#username").val();
+        let password = $("#password").val();
+        $.ajax({
+          type: "POST",
+          url: `http://192.168.11.123:3000/api/auth/login`,
+          contentType: 'application/json',
+          data: JSON.stringify({
+            email: username, // Đổi từ email thành username
+            password: password,
+            clientId: "14605dfbdc7e01a23b3b3effc1fc070d"
+          }),
+          success: function (data) {
+            if(data.redirectUrl){
+              window.location.href = data.redirectUrl;
+            }
+
+          },
+          error: function (error) {
+            console.log('Error Status:', error.status);
+            console.log('Error Response:', error.responseText);
+          }
+        });
       });
     });
   </script>
