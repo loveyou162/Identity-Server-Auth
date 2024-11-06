@@ -149,18 +149,13 @@ const refreshToken = async (req, res) => {
 const authorizeCode = async (req, res) => {
   const scope = "email profile";
   const { clientId, redirectUri } = req.body; // Các quyền yêu cầu
-  console.log(scope);
   const state = Math.random().toString(36).substring(7); // Tạo chuỗi ngẫu nhiên cho state
 
   // Kiểm tra xem client có hợp lệ không
   const client = await ClientModel.findOne({ clientId });
+  console.log(client);
   if (!client || client.redirectUri !== redirectUri) {
     return res.status(400).json({ message: "Invalid client or redirect URI" });
-  }
-
-  // Kiểm tra xem người dùng có xác thực không
-  if (!req.user) {
-    return res.status(401).json({ message: "User not authenticated" });
   }
 
   const authUrl =
@@ -187,7 +182,7 @@ const postLogin = async (req, res) => {
   const code = generateAuthorizationCode();
   storeAuthorizationCode(code, clientId, user._id, 20);
   console.log(code);
-  res.redirect(`${Client.redirectUri}?code=${code}`);
+  res.json({ redirectUrl: `${Client.redirectUri}?code=${code}` });
 };
 
 //bước 3 Hàm callback để nhận mã xác thực và lấy token truy cập
@@ -369,7 +364,26 @@ const exchangeAuthorizationCodeForToken = async (req, res) => {
       .send("Error exchanging authorization code for token: " + error.message);
   }
 };
+const protectedRoutes = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
 
+  // Kiểm tra xem header authorization có tồn tại hay không
+  if (!authHeader) {
+    return res.status(401).json({ message: "Bạn cần đăng nhập" });
+  }
+
+  // Lấy token từ header
+  const token = authHeader.split(" ")[1];
+
+  // Xác thực token
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Token không hợp lệ" });
+    }
+    req.user = user.user; // Giả sử token chứa thông tin user
+    next();
+  });
+};
 export {
   postLogin,
   postRegister,
@@ -378,4 +392,5 @@ export {
   refreshToken,
   authCode,
   authorizeCode,
+  protectedRoutes,
 };

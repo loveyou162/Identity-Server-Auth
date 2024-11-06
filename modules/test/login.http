@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "clientId": "14605dfbdc7e01a23b3b3effc1fc070d",
-    "email": "rulnonja@ak.sl@example.com",
+    "email": "rulnonja@ak.slexample.com",
     "password": "password123"
 }
 ##################/oauth/token
@@ -23,14 +23,14 @@ POST http://localhost:3000/api/auth/oauth/token
 Content-Type: application/json
 
 {
-    "code": "16d0e3592febd3be0aeaa5af99644d16a64e5d67"
+    "code": "4a0b2ef40d571d804fa7f0534390a8c7c4ee7ef2"
 }
 ##################/oauth/callback
 POST http://localhost:3000/api/auth/oauth/callback
 Content-Type: application/json
 
 {
-    "code": "8e4fce369e4857978813e74bef9ae64ae9d8d440"
+    "code": "4a0b2ef40d571d804fa7f0534390a8c7c4ee7ef2"
 }
 ##################/oauth/token
 POST http://localhost:3000/api/auth/oauth/refreshToken
@@ -45,6 +45,6 @@ POST http://localhost:3000/api/auth/oauth/authorize
 Content-Type: application/json
 
 {
-    "clientId": "d59410953cac1a6b34ff71fb0a65082e7077938c",
-    "redirectUri": "http://localhost:3000/auth/oauth/callback"
+    "clientId": "14605dfbdc7e01a23b3b3effc1fc070d",
+    "redirectUri": "http://localhost:3001/config/callback"
 }
