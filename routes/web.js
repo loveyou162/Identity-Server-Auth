@@ -8,9 +8,6 @@ const router = express.Router();
  * @param {*} app : express app
  */
 const initWebRoutes = (app) => {
-
-    router.get("/login", viewLogin);
-
     app.use(router);
 }
 

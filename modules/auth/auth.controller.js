@@ -154,11 +154,6 @@ const authorizeCode = async (req, res) => {
     return res.status(400).json({ message: "Invalid client or redirect URI" });
   }
 
-  // Kiểm tra xem người dùng có xác thực không
-  if (!req.user) {
-    return res.status(401).json({ message: "User not authenticated" });
-  }
-
   const authUrl =
     `${authorizationServerUrl}/authorize?` +
     `client_id=${clientId}&` +

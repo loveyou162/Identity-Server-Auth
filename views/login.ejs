@@ -152,6 +152,19 @@
 
   <script>
     $(document).ready(function () {
+
+      function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, "\\$&");
+        let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+      }
+
+      // Lấy client_id từ URL
+      const clientId = getParameterByName("client_id") ?? "";
+
       $("#btn-submit").on("click", function () {
         let username = $("#username").val();
         let password = $("#password").val();
@@ -160,15 +173,14 @@
           url: `http://192.168.11.123:3000/api/auth/login`,
           contentType: 'application/json',
           data: JSON.stringify({
-            email: username, // Đổi từ email thành username
+            email: username,
             password: password,
-            clientId: "14605dfbdc7e01a23b3b3effc1fc070d"
+            clientId: clientId
           }),
           success: function (data) {
             if(data.redirectUrl){
               window.location.href = data.redirectUrl;
             }
-
           },
           error: function (error) {
             console.log('Error Status:', error.status);
