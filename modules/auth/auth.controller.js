@@ -13,10 +13,6 @@ import axios from "axios";
 import AuthCode from "../../models/authorizeCode.model.js";
 import { log } from "console";
 const viewLogin = (req, res) => {
-  let socialOption = req.query.with;
-  if (socialOption) {
-    return res.redirect(`/auth/${socialOption}`);
-  }
   res.render("login");
 };
 
@@ -158,11 +154,6 @@ const authorizeCode = async (req, res) => {
     return res.status(400).json({ message: "Invalid client or redirect URI" });
   }
 
-  // Kiểm tra xem người dùng có xác thực không
-  if (!req.user) {
-    return res.status(401).json({ message: "User not authenticated" });
-  }
-
   const authUrl =
     `${authorizationServerUrl}/authorize?` +
     `client_id=${clientId}&` +
@@ -171,7 +162,7 @@ const authorizeCode = async (req, res) => {
     `scope=${encodeURIComponent(scope)}&` +
     `state=${state}`;
 
-  res.redirect(authUrl);
+   res.redirect(authUrl);
 };
 
 //bước 2 Đăng nhập người dùng
