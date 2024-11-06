@@ -4,11 +4,18 @@ import * as auth from "../auth/auth.controller.js";
 import { allowedTo } from "../../middleware/auth.js";
 
 const router = express.Router();
-router.post(
-  "/register-client",
-  // ,allowedTo("admin")
-  auth.protectedRoutes,
-  clientController.registerClient
-);
+router
+  .route("/")
+  .post(
+    //allowedTo("admin"),
+    auth.protectedRoutes,
+    clientController.registerClient
+  )
+  .get(clientController.getAll);
 
+router
+  .route("/:id")
+  .put(clientController.updateConfigClient)
+  .get(clientController.getIdConfig)
+  .delete(clientController.deleteConfigClient);
 export default router;
