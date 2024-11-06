@@ -3,10 +3,15 @@ import * as clientController from "./client.controller.js";
 import { allowedTo } from "../../middleware/auth.js";
 
 const router = express.Router();
-router.post(
-  "/register-client",
-  // ,allowedTo("admin")
-  clientController.registerClient
-);
+router.route("/")
+.post(
+    //allowedTo("admin"),
+    clientController.registerClient
+    )
+.get(clientController.getAll);
 
+router.route("/:id")
+.put(clientController.updateConfigClient)
+.get(clientController.getIdConfig)
+.delete(clientController.deleteConfigClient)
 export default router;
