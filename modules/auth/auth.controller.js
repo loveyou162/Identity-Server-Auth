@@ -13,10 +13,6 @@ import axios from "axios";
 import AuthCode from "../../models/authorizeCode.model.js";
 import { log } from "console";
 const viewLogin = (req, res) => {
-  let socialOption = req.query.with;
-  if (socialOption) {
-    return res.redirect(`/auth/${socialOption}`);
-  }
   res.render("login");
 };
 
@@ -166,7 +162,7 @@ const authorizeCode = async (req, res) => {
     `scope=${encodeURIComponent(scope)}&` +
     `state=${state}`;
 
-  res.redirect(authUrl);
+   res.redirect(authUrl);
 };
 
 //bước 2 Đăng nhập người dùng
