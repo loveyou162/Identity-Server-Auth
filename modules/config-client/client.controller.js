@@ -1,5 +1,9 @@
 import crypto from "crypto";
 import Client from "../../models/oauthClient.model.js";
+import { catchAsyncError } from "../../utils/catchAsyncError.js";
+import { AppError } from "../../utils/AppError.js";
+import { deleteOne } from "../../handlers/factor.js";
+
 
 // Hàm tạo chuỗi ngẫu nhiên
 const generateRandomString = (length) =>
@@ -24,4 +28,45 @@ const registerClient = async (req, res) => {
 
   res.json({ clientId, clientSecret, redirectUri });
 };
-export { registerClient };
+
+const getAll = async (req, res) => {
+  try {
+    const configs = await Client.find();
+    res.status(200).json({ status: 'success', data: configs });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+const updateConfigClient = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const updateConfigClient = await Client.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
+
+  updateConfigClient && res.status(201).json({ message: "success", updateConfigClient });
+
+  !updateConfigClient && next(new AppError("Client was not found", 404));
+});
+const deleteConfigClient = deleteOne(Client, "OAuthClient");
+const getIdConfig = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const config = await OauthConfig.findOne({ id });
+
+    if (!config) {
+      return res.status(404).json({ status: 'error', message: 'client not found' });
+    }
+
+    res.status(200).json({ status: 'success', data: config });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+export {
+   registerClient  ,
+   getAll ,
+    updateConfigClient,
+    deleteConfigClient,
+    getIdConfig,
+};
