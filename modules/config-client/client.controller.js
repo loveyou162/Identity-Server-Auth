@@ -65,10 +65,27 @@ const getIdConfig = async (req, res) => {
     res.status(500).json({ status: "error", message: error.message });
   }
 };
+const getClientIdConfig = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const config = await Client.findOne({ clientId });
+    console.log({ config });
+    if (!config) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "client not found" });
+    }
+
+    res.status(200).json({ status: "success", data: config });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
 export {
   registerClient,
   getAll,
   updateConfigClient,
   deleteConfigClient,
   getIdConfig,
+  getClientIdConfig,
 };

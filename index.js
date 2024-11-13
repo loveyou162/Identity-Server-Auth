@@ -37,7 +37,7 @@ app.get("/authorize", (req, res) => {
   res.render("login");
 });
 
-const PORT = process.env.PORT || 3000; // Cổng cho Authorization Server
+const PORT = process.env.PORT || 5000; // Cổng cho Authorization Server
 // Kết nối với MongoDB
 mongoose
   .connect(process.env.MONGO_URI)

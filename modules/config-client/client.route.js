@@ -15,7 +15,9 @@ router
 
 router
   .route("/:id")
-  .put(clientController.updateConfigClient)
-  .get(clientController.getIdConfig)
-  .delete(clientController.deleteConfigClient);
+  .put(auth.protectedRoutes, clientController.updateConfigClient)
+  .get(auth.protectedRoutes, clientController.getIdConfig)
+  .delete(auth.protectedRoutes, clientController.deleteConfigClient);
+
+router.get("/get-client/:clientId", clientController.getClientIdConfig);
 export default router;

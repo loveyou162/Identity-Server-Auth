@@ -19,8 +19,8 @@ const viewLogin = (req, res) => {
 // const clientId = "YOUR_CLIENT_ID";
 const clientSecret = "YOUR_CLIENT_SECRET";
 
-// const redirectUri = "http://localhost:3000/auth/oauth/callback";
-const authorizationServerUrl = "http://localhost:3000";
+// const redirectUri = "http://localhost:5000/auth/oauth/callback";
+const authorizationServerUrl = "http://localhost:5000";
 
 //tạo access token
 const generateAccessToken = (data) => {
@@ -39,34 +39,41 @@ function generateAuthorizationCode() {
   return crypto.randomBytes(20).toString("hex"); // Tạo mã ngẫu nhiên 40 ký tự
 }
 
-// Đăng ký
 const postRegister = async (req, res) => {
   const { username, password, email, fullName, provider } = req.body;
-  // console.log({ username, password, email, fullName, provider });
+
+  // Check for missing fields
+  if (!username || !password || !email || !fullName) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
 
   try {
-    // Kiểm tra xem người dùng đã tồn tại chưa
+    // Kiểm tra xem user có tồn tại không
     const existingUser = await UserModel.findOne({ email });
-    console.log(14, existingUser);
     if (existingUser) {
-      return res.status(400).send({ message: "User already exists" });
+      return res.status(409).json({ message: "User already exists" });
     }
 
-    // Tạo người dùng mới
+    // Create new user
     const newUser = new UserModel({
       username,
-      password,
+      password, // Store hashed password
       email,
       fullName,
+      provider,
     });
+
+    // Save new user to database
     await newUser.save();
-    res.status(201).send({
+
+    // Send success response
+    return res.status(201).json({
       message: "User registered successfully",
       user: { _id: newUser.id, username: newUser.username },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "Error registering user" });
+    console.error("Error registering user:", error);
+    return res.status(500).json({ message: "Error registering user" });
   }
 };
 
@@ -162,23 +169,32 @@ const authorizeCode = async (req, res) => {
     `scope=${encodeURIComponent(scope)}&` +
     `state=${state}`;
 
-   res.redirect(authUrl);
+  res.json({ authUrl });
 };
 
 //bước 2 Đăng nhập người dùng
 // /api/auth/login
+// Custom login handler function
 const postLogin = async (req, res) => {
-  const user = req.user;
-  const { clientId } = req.body;
-  // `req.user` sẽ được điền bởi passport nếu xác thực thành công
-  console.log(49, user);
-  const Client = await ClientModel.findOne({ clientId });
-  console.log({ Client });
+  try {
+    const user = req.user;
+    const { clientId } = req.body;
 
-  const code = generateAuthorizationCode();
-  storeAuthorizationCode(code, clientId, user._id, 20);
-  console.log(code);
-  res.json({ redirectUrl: `${Client.redirectUri}?code=${code}` });
+    const client = await ClientModel.findOne({ clientId });
+    if (!client) {
+      return res.status(400).json({ error: "Client not found" });
+    }
+
+    const code = generateAuthorizationCode();
+    storeAuthorizationCode(code, clientId, user._id, 20);
+
+    res.json({
+      redirectUrl: `${client.redirectUri}?code=${code}&state=wso2`,
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
 //bước 3 Hàm callback để nhận mã xác thực và lấy token truy cập
@@ -293,73 +309,34 @@ const authCode = async (req, res) => {
     res.status(500).send("Error getting access token");
   }
 };
-/////////////////////////////////
-// Cấp mã ủy quyền (Authorization Code)
-const authorize = async (req, res) => {
-  const { clientId, redirectUri } = req.body;
 
-  // Kiểm tra xem client có hợp lệ không
-  const client = await Client.findOne({ clientId });
-  if (!client || client.redirectUri !== redirectUri) {
-    return res.status(400).send("Invalid client or redirect URI");
-  }
-
-  // Kiểm tra xem người dùng có xác thực không
-  if (!req.user) {
-    return res.status(401).send("User not authenticated");
-  }
-
-  // Tạo mã ủy quyền
-  const authorizationCode = new AuthorizationCode({
-    code: generateRandomCode(), // Hàm tạo mã ngẫu nhiên
-    clientId: clientId,
-    userId: req.user._id,
-    redirectUri: redirectUri,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 10), // Hết hạn sau 10 phút
-  });
-
-  await authorizationCode.save();
-
-  // Chuyển hướng đến redirect URI với mã ủy quyền
-  res.redirect(`${redirectUri}?code=${authorizationCode.code}`);
-};
-
-// Tạo mã token từ authorization code
-const exchangeAuthorizationCodeForToken = async (req, res) => {
-  const { code, clientId, clientSecret } = req.body;
-
+const postLogout = async (req, res, next) => {
   try {
-    // Lấy mã ủy quyền
-    const authCode = await AuthorizationCode.findOne({ code });
-    if (!authCode) {
-      return res.status(400).send("Invalid authorization code");
+    const { userId } = req.body;
+    console.log(userId);
+    console.log("User ID:", userId);
+
+    // Tìm người dùng dựa trên userId
+    const user = await UserModel.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Kiểm tra client
-    const client = await Client.findOne({ clientId, clientSecret });
-    if (!client) {
-      return res.status(400).send("Invalid client credentials");
-    }
+    // Cập nhật accessToken và refreshToken thành null
+    user.accessToken = null;
+    user.refreshToken = null;
 
-    // Kiểm tra xem mã ủy quyền có hết hạn không
-    if (new Date() > authCode.expiresAt) {
-      return res.status(400).send("Authorization code has expired");
-    }
+    // Lưu lại thay đổi vào cơ sở dữ liệu
+    await user.save();
 
-    // Tạo Access Token
-    const accessToken = jwt.sign(
-      { id: authCode.userId, clientId: authCode.clientId },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.json({ accessToken });
+    res.json({ message: "Logged out", logout: true });
   } catch (error) {
-    res
-      .status(500)
-      .send("Error exchanging authorization code for token: " + error.message);
+    console.error("Error logging out:", error);
+    res.status(500).json({ message: "Failed to logout", error });
   }
 };
+
 const protectedRoutes = (req, res, next) => {
   const authHeader = req.headers["authorization"];
 
@@ -389,4 +366,5 @@ export {
   authCode,
   authorizeCode,
   protectedRoutes,
+  postLogout,
 };
