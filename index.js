@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 import "./config/passport.js";
 import initWebRoutes from "./routes/web.js";
 import userRouter from "./modules/user/user.routes.js";
-
+import cors from "cors";
 import clientRoutes from "./modules/config-client/client.route.js";
 // Cấu hình dotenv để sử dụng biến môi trường
 dotenv.config();
@@ -37,12 +37,13 @@ app.get("/authorize", (req, res) => {
   res.render("login");
 });
 
-const PORT = process.env.PORT || 3000; // Cổng cho Authorization Server
+const PORT = process.env.PORT || 5000; // Cổng cho Authorization Server
 // Kết nối với MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected for Auth Server"))
   .catch((err) => console.log("MongoDB connection error:", err));
+app.use(cors());
 
 // Cấu hình middleware
 app.use(morgan("dev"));

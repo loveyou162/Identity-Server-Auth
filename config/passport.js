@@ -7,30 +7,26 @@ import jwt from "jsonwebtoken"; // Nhớ import jwt nếu bạn chưa làm
 // Định nghĩa Local Strategy
 passport.use(
   new LocalStrategy(
-    { usernameField: "username", passwordField: "password" }, // Chỉ định tên trường
-    async (username, password, done) => {
-        console.log(username,password);
+    { usernameField: "email", passwordField: "password" },
+    async (email, password, done) => {
       try {
-        // Tìm người dùng theo username
-        const user = await UserModel.findOne({ username });
-        console.log(user.password);
-        // Nếu không tìm thấy người dùng, trả về thông báo
+        // Find user by email
+        const user = await UserModel.findOne({ email });
         if (!user) {
-          return done(null, false, { message: "Incorrect credentials." });
-        }
-        console.log("ok có user");
-        // So sánh mật khẩu
-        const doMatch = await bcrypt.compare(password, user.password);
-        console.log(doMatch);
-        if (!doMatch) {
-          return done(null, false, { message: "Incorrect credentials." });
+          return done(null, false, { message: "Email not found." });
         }
 
-        console.log("User authenticated successfully.");
-        return done(null, user); // Đăng nhập thành công
+        // Check password
+        const doMatch = await bcrypt.compare(password, user.password);
+        if (!doMatch) {
+          return done(null, false, { message: "Incorrect password." });
+        }
+
+        // Successful authentication
+        return done(null, user);
       } catch (error) {
         console.error("Error during authentication:", error);
-        return done(error); // Xử lý lỗi
+        return done(error); // Pass error to done callback
       }
     }
   )

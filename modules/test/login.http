@@ -1,50 +1,60 @@
-POST http://localhost:3000/api/auth/register
+POST http://localhost:5000/api/auth/register
 Content-Type: application/json
 
 {
-    "username": "exampleUser",
+    "username": "exampleUser1",
     "password": "password123",
-    "email": "example@example.com",
+    "email": "caoboi@gmail.com",
     "fullName": "Phạm Đình Thắng",
     "provider": "google"
 }
 
 ##################login
-POST http://localhost:3000/api/auth/login
+POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-    "clientId": "14605dfbdc7e01a23b3b3effc1fc070d",
-    "username": "LeliaBrooks",
+    "clientId": "99c2da5e99342f6daf6a432363afb1e5",
+    "email": "rulnonja@ak.slexample.com",
     "password": "password123"
 }
 ##################/oauth/token
-POST http://localhost:3000/api/auth/oauth/token
+POST http://localhost:5000/api/auth/oauth/token
 Content-Type: application/json
 
 {
-    "code": "16d0e3592febd3be0aeaa5af99644d16a64e5d67"
+    "code": "fdb575f488ea372f532614722a8d0ac1574e3b9b"
 }
 ##################/oauth/callback
-POST http://localhost:3000/api/auth/oauth/callback
+POST http://localhost:5000/api/auth/oauth/callback
 Content-Type: application/json
 
 {
-    "code": "8e4fce369e4857978813e74bef9ae64ae9d8d440"
+    "code": "e5db60cb9e727a92e050cced9b3e6ca3de5b4de4"
 }
 ##################/oauth/token
-POST http://localhost:3000/api/auth/oauth/refreshToken
+POST http://localhost:5000/api/auth/oauth/refreshToken
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsZXhhbXBsZS5jb20iLCJpYXQiOjE3MzEwNTUyNDYsImV4cCI6MTczMTA1ODg0Nn0.evz8LWmtnM8xIEFe6mvfIHlynUKaFibAiFFmB4sU6Qs
 
 {
-      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsQGV4YW1wbGUuY29tIiwiaWF0IjoxNzMwNzkzMTkwLCJleHAiOjE3MzEzOTc5OTB9.gUWQ8ZLceqFgzxUwctSpviLqq_guUsomnRIt5SALP4Q"
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA4NzY0MzUsImV4cCI6MTczMTQ4MTIzNX0.5KiWYcmvfIkUVsjwUs3tjWXpa5wceBSjM1KypX-IR20"
 }
 
 ##################login
-POST http://localhost:3000/api/auth/oauth/authorize
+POST http://localhost:5000/api/auth/oauth/authorize
 Content-Type: application/json
 
 {
-    "clientId": "d59410953cac1a6b34ff71fb0a65082e7077938c",
-    "redirectUri": "http://localhost:3000/auth/oauth/callback"
+    "clientId": "eaf766a96215dc0048e380f6dc3dac9c",
+    "redirectUri": "http://localhost:3001/config/callback"
+}
+
+##################/oauth/token
+POST http://localhost:5000/api/auth/oauth/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI5YzhkODk4MjFkYWI3OWRkZDU4MmQiLCJlbWFpbCI6InJ1bG5vbmphQGFrLnNsZXhhbXBsZS5jb20iLCJpYXQiOjE3MzEwNTU1NTUsImV4cCI6MTczMTA1OTE1NX0.4h_s34QcLWiNKEEAfLKvwAcJFEXS4__rQRIDyhubPFk
+
+{
+    "userId" : "6729c8d89821dab79ddd582d"
 }

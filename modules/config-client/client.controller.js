@@ -4,7 +4,6 @@ import { catchAsyncError } from "../../utils/catchAsyncError.js";
 import { AppError } from "../../utils/AppError.js";
 import { deleteOne } from "../../handlers/factor.js";
 
-
 // Hàm tạo chuỗi ngẫu nhiên
 const generateRandomString = (length) =>
   crypto.randomBytes(length).toString("hex");
@@ -32,9 +31,9 @@ const registerClient = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const configs = await Client.find();
-    res.status(200).json({ status: 'success', data: configs });
+    res.status(200).json({ status: "success", data: configs });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: "error", message: error.message });
   }
 };
 
@@ -44,29 +43,49 @@ const updateConfigClient = catchAsyncError(async (req, res, next) => {
     new: true,
   });
 
-  updateConfigClient && res.status(201).json({ message: "success", updateConfigClient });
+  updateConfigClient &&
+    res.status(201).json({ message: "success", updateConfigClient });
 
   !updateConfigClient && next(new AppError("Client was not found", 404));
 });
 const deleteConfigClient = deleteOne(Client, "OAuthClient");
 const getIdConfig = async (req, res) => {
   try {
-    const { id } = req.params; 
-    const config = await OauthConfig.findOne({ id });
+    const { id } = req.params;
+    const config = await Client.findById(id);
 
     if (!config) {
-      return res.status(404).json({ status: 'error', message: 'client not found' });
+      return res
+        .status(404)
+        .json({ status: "error", message: "client not found" });
     }
 
-    res.status(200).json({ status: 'success', data: config });
+    res.status(200).json({ status: "success", data: config });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+const getClientIdConfig = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const config = await Client.findOne({ clientId });
+    console.log({ config });
+    if (!config) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "client not found" });
+    }
+
+    res.status(200).json({ status: "success", data: config });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
   }
 };
 export {
-   registerClient  ,
-   getAll ,
-    updateConfigClient,
-    deleteConfigClient,
-    getIdConfig,
+  registerClient,
+  getAll,
+  updateConfigClient,
+  deleteConfigClient,
+  getIdConfig,
+  getClientIdConfig,
 };
